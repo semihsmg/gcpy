@@ -52,9 +52,6 @@ def TarihEkle():
 # for veri in read.fetchall():
 #     print('Tarih: %s - Saat: %s' % veri)
 
-###############################
-# 00.00.00 00:00
-###############################
 
 TarihEkle()
 for veri in conn.execute('SELECT tarih,saat FROM veriler'):
