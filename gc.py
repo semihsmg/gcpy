@@ -6,13 +6,18 @@ db = sqlite3.connect('GirisCikis.db')
 now = datetime.datetime.now()
 conn = db.cursor()
 
+tarihBicim = '%d.%m.%Y'
+saatBicim = '%H:%M'
+
 
 def tarih():
-    return now.strftime('%d.%m.%Y')  # '%d' % now.day + '.' + '%d' % now.month + '.' + '%d' % now.year
+    return now.strftime(tarihBicim)
+    # '%d' % now.day + '.' + '%d' % now.month + '.' + '%d' % now.year
 
 
 def saat():
-    return now.strftime('%H:%M')  # '%d' % now.hour + ':' + '%d' % now.minute
+    return now.strftime(saatBicim)
+    # '%d' % now.hour + ':' + '%d' % now.minute
 
 
 def tarih_ekle():
@@ -27,6 +32,19 @@ def veri_yazdir():
         print(veri[0], veri[1])
 
 
+def sure_hesapla():
+    # s1 = '11:00'
+    # s2 = '17:00'
+    # fark = now.strptime(s2, saatBicim) - now.strptime(s1, saatBicim)
+    # print(fark)
+
+    # TODO: Tarih ve saati 2 ayrı liste yaparak hesaplamaya devam
+    for veri in conn.execute('SELECT tarih,saat FROM veriler'):
+        # TODO: tarih ve saat olarak 2 ayrı for loop
+        # print(veri[0] + '---' + veri[1] )
+        pass
+
+
 def secenekler():
     print('1 - Giriş kaydı')
     print('2 - Veri ekle')
@@ -36,7 +54,7 @@ def secenekler():
 
 
 def bosluk():
-    print('####################\n')
+    print('-------------------\n')
 
 
 def islemler():
@@ -46,7 +64,7 @@ def islemler():
         girdi = int(input('>>>'))
     except:
         girdi = 0
-        print('Gardaş seçenekler 1 den 4 e kadar. Yapma gözünü seveyim.')
+        print('Gardaş seçenekler 1 den 5 e kadar. Yapma gözünü seveyim.')
 
     print()
     if girdi == 1:
@@ -56,7 +74,7 @@ def islemler():
     elif girdi == 3:
         veri_yazdir()
     elif girdi == 4:
-        pass
+        sure_hesapla()
     elif girdi == 5:
         db.close()
         print('Veriler kayıt edildi.')
@@ -75,43 +93,43 @@ def islemler():
 while True:
     islemler()
     bosluk()
-# ##############################
-# # Tablo oluşturma
-# ##############################
-# db.execute('''CREATE TABLE IF NOT EXISTS
-#                   veriler (
-#                       tarih VARCHAR(50) NOT NULL,
-#                       saat VARCHAR(50) NOT NULL
-#                       )''')
-# if db:
-#     print('Verilere erişildi.')
-# else:
-#     print('Verilere erişilemedi')
-# ##############################
-# # Veri ekleme
-# ##############################
-# db.execute('''INSERT INTO veriler (tarih,saat) VALUES ('25.10.17','16:10')''')
-# db.commit()
+    # ##############################
+    # # Tablo oluşturma
+    # ##############################
+    # db.execute('''CREATE TABLE IF NOT EXISTS
+    #                   veriler (
+    #                       tarih VARCHAR(50) NOT NULL,
+    #                       saat VARCHAR(50) NOT NULL
+    #                       )''')
+    # if db:
+    #     print('Verilere erişildi.')
+    # else:
+    #     print('Verilere erişilemedi')
+    # ##############################
+    # # Veri ekleme
+    # ##############################
+    # db.execute('''INSERT INTO veriler (tarih,saat) VALUES ('25.10.17','16:10')''')
+    # db.commit()
 
-###############################
-# Veri silme
-###############################
-# db.execute("DELETE FROM veriler WHERE tarih='24.10.17'")
+    ###############################
+    # Veri silme
+    ###############################
+    # db.execute("DELETE FROM veriler WHERE tarih='24.10.17'")
 
-###############################
-# Veri güncelleme
-###############################
-# db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
+    ###############################
+    # Veri güncelleme
+    ###############################
+    # db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
 
-###############################
-# [('23.10.17', '16:10'), ... ]
-###############################
-# read = select.execute('SELECT * FROM veriler')
-# print(read.fetchall())
+    ###############################
+    # [('23.10.17', '16:10'), ... ]
+    ###############################
+    # read = select.execute('SELECT * FROM veriler')
+    # print(read.fetchall())
 
-###############################
-# Tarih: 00.00.00 Saat: 00:00
-###############################
-# read = select.execute('SELECT tarih,saat FROM veriler')
-# for veri in read.fetchall():
-#     print('Tarih: %s - Saat: %s' % veri)
+    ###############################
+    # Tarih: 00.00.00 Saat: 00:00
+    ###############################
+    # read = select.execute('SELECT tarih,saat FROM veriler')
+    # for veri in read.fetchall():
+    #     print('Tarih: %s - Saat: %s' % veri)
