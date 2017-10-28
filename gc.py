@@ -1,13 +1,14 @@
 import sqlite3
 import datetime
 import sys
+from collections import defaultdict
 
 db = sqlite3.connect('GirisCikis.db')
 now = datetime.datetime.now()
 conn = db.cursor()
 
 tarihBicim = '%d.%m.%Y'
-saatBicim = '%H:%M'
+saatBicim = '%H:%M:%S'
 
 
 def tarih():
@@ -33,17 +34,28 @@ def veri_yazdir():
 
 
 def sure_hesapla():
-    # s1 = '11:00'
-    # s2 = '17:00'
-    # fark = now.strptime(s2, saatBicim) - now.strptime(s1, saatBicim)
-    # print(fark)
+    # Dict
+    dict_ts = {}
+    for veri in conn.execute('SELECT tarih, saat FROM veriler'):
+        dict_ts.setdefault(veri[0], []).append(veri[1])
 
-    # TODO: Tarih ve saati 2 ayrı liste yaparak hesaplamaya devam
-    for veri in conn.execute('SELECT tarih,saat FROM veriler'):
-        # TODO: tarih ve saat olarak 2 ayrı for loop
-        # print(veri[0] + '---' + veri[1] )
-        pass
+    s_list = []
+    for key in dict_ts.values():  # 04:00:00, ... ham günlük toplam süre
+        s1 = key[0]
+        s2 = key[-1]
+        diff = now.strptime(s2, saatBicim) - now.strptime(s1, saatBicim)
+        s_list.append(str(diff))
+        print(diff)
+    print(s_list)
 
+    total = now.strftime(saatBicim)
+    for index in s_list:
+        total += now.strptime(index, saatBicim)
+
+    print(total)
+
+# TODO: Elle veri ekleme ve silme fonksiyonu ekle
+# TODO: database deki saat biçimlerini 00:00:00 şekline getir.
 
 def secenekler():
     print('1 - Giriş kaydı')
@@ -78,7 +90,7 @@ def islemler():
     elif girdi == 5:
         db.close()
         print('Veriler kayıt edildi.')
-        print('Çıkmak için herhangi bir tuşa basın.')
+        print('Çıkmak için Enter a basın.')
         input('')
         sys.exit()
 
