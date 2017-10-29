@@ -1,11 +1,25 @@
 import sqlite3
 import datetime
 import sys
-from collections import defaultdict
+
+# TODO: Database verilerini tarih olarak küçükden büyüğe doğru sırala.
+# (Sonradan eskiye dönük tarih eklenmesi durumunda düzgün görülmesi için)
 
 db = sqlite3.connect('GirisCikis.db')
-now = datetime.datetime.now()
 conn = db.cursor()
+
+# ##############################
+# # Tablo oluşturma
+# ##############################
+# db.execute('''CREATE TABLE IF NOT EXISTS
+#                   veriler (
+#                       tarih VARCHAR(50) NOT NULL,
+#                       saat VARCHAR(50) NOT NULL
+#                       )''')
+# if db:
+#     print('Verilere erişildi.')
+# else:
+#     print('Verilere erişilemedi')
 
 tarihBicim = '%d.%m.%Y'
 saatBicim = '%H:%M:%S'
@@ -13,19 +27,32 @@ saatBicim = '%H:%M:%S'
 
 def tarih():
     return now.strftime(tarihBicim)
-    # '%d' % now.day + '.' + '%d' % now.month + '.' + '%d' % now.year
 
 
 def saat():
     return now.strftime(saatBicim)
-    # '%d' % now.hour + ':' + '%d' % now.minute
 
 
-def tarih_ekle():
+def ani_ekle():
     conn.execute("INSERT INTO veriler (tarih,saat) VALUES (?,?)",
                  (tarih(), saat()))
     db.commit()
     print('Kayıt gerçekleştirildi.')
+
+
+def elle_ekle(t, s):
+    conn.execute("INSERT INTO veriler (tarih,saat) VALUES (?,?)",
+                 (t, s))
+    db.commit()
+
+
+def elle_sil(t, s):
+    try:
+        conn.execute("DELETE FROM veriler WHERE tarih = ? AND saat = ?",
+                     (t, s))
+    except SyntaxError:
+        print('Eksik veya yanlış girdi.')
+    db.commit()
 
 
 def veri_yazdir():
@@ -45,28 +72,30 @@ def sure_hesapla():
         s2 = key[-1]
         diff = now.strptime(s2, saatBicim) - now.strptime(s1, saatBicim)
         s_list.append(str(diff))
-        print(diff)
-    print(s_list)
+        # print('for: sure_hesapla, diff = ' + str(diff))
+    # print('s_list = ' + str(s_list))
 
-    total = now.strftime(saatBicim)
+    total = datetime.datetime.strptime('0:00:00', saatBicim)
     for index in s_list:
-        total += now.strptime(index, saatBicim)
+        total = total + datetime.timedelta(hours=int(index[:-6]),
+                                           minutes=int(index[-5:-3]),
+                                           seconds=int(index[-2:]))
+        print('index = ' + index)
 
-    print(total)
+    print('total = ' + total.strftime(saatBicim))
 
-# TODO: Elle veri ekleme ve silme fonksiyonu ekle
-# TODO: database deki saat biçimlerini 00:00:00 şekline getir.
 
 def secenekler():
     print('1 - Giriş kaydı')
     print('2 - Veri ekle')
-    print('3 - Verileri yazdır')
-    print('4 - Süre hesapla')
-    print('5 - Çıkış')
+    print('3 - Veri sil')
+    print('4 - Verileri yazdır')
+    print('5 - Süre hesapla')
+    print('6 - Çıkış')
 
 
 def bosluk():
-    print('-------------------\n')
+    print('-------------------')
 
 
 def islemler():
@@ -76,23 +105,26 @@ def islemler():
         girdi = int(input('>>>'))
     except:
         girdi = 0
-        print('Gardaş seçenekler 1 den 5 e kadar. Yapma gözünü seveyim.')
+        print('Sayı giriniz.')
 
-    print()
     if girdi == 1:
-        tarih_ekle()
+        ani_ekle()
     elif girdi == 2:
-        pass
+        elle_ekle(input('Tarih (Örn 01.01.01) : '), input('Saat (Örn 01:01) : '))
     elif girdi == 3:
-        veri_yazdir()
+        elle_sil(input('Tarih (Örn 01.01.01) : '), input('Saat (Örn 01:01) : '))
     elif girdi == 4:
-        sure_hesapla()
+        veri_yazdir()
     elif girdi == 5:
+        sure_hesapla()
+    elif girdi == 6:
         db.close()
         print('Veriler kayıt edildi.')
         print('Çıkmak için Enter a basın.')
         input('')
         sys.exit()
+    else:
+        print('Gardaş seçenekler 1 den 6 e kadar. Yapma gözünü seveyim.')
 
 
 # try:
@@ -101,47 +133,12 @@ def islemler():
 # except SyntaxError:
 #     pass
 
-
 while True:
+    now = datetime.datetime.now()
     islemler()
     bosluk()
-    # ##############################
-    # # Tablo oluşturma
-    # ##############################
-    # db.execute('''CREATE TABLE IF NOT EXISTS
-    #                   veriler (
-    #                       tarih VARCHAR(50) NOT NULL,
-    #                       saat VARCHAR(50) NOT NULL
-    #                       )''')
-    # if db:
-    #     print('Verilere erişildi.')
-    # else:
-    #     print('Verilere erişilemedi')
-    # ##############################
-    # # Veri ekleme
-    # ##############################
-    # db.execute('''INSERT INTO veriler (tarih,saat) VALUES ('25.10.17','16:10')''')
-    # db.commit()
 
-    ###############################
-    # Veri silme
-    ###############################
-    # db.execute("DELETE FROM veriler WHERE tarih='24.10.17'")
-
-    ###############################
-    # Veri güncelleme
-    ###############################
-    # db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
-
-    ###############################
-    # [('23.10.17', '16:10'), ... ]
-    ###############################
-    # read = select.execute('SELECT * FROM veriler')
-    # print(read.fetchall())
-
-    ###############################
-    # Tarih: 00.00.00 Saat: 00:00
-    ###############################
-    # read = select.execute('SELECT tarih,saat FROM veriler')
-    # for veri in read.fetchall():
-    #     print('Tarih: %s - Saat: %s' % veri)
+###############################
+# Veri güncelleme
+###############################
+# db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
