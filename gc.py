@@ -103,7 +103,7 @@ def islemler():
 
     try:
         girdi = int(input('>>>'))
-    except:
+    except ValueError:
         girdi = 0
         print('Sayı giriniz.')
 
