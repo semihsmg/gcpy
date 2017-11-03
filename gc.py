@@ -1,9 +1,10 @@
 import sqlite3
 import datetime
 import sys
+import re
 
 # TODO: Database verilerini tarih olarak küçükden büyüğe doğru sırala.
-# (Sonradan eskiye dönük tarih eklenmesi durumunda düzgün görülmesi için)
+# (Eskiye dönük tarih eklenmesi durumunda düzgün görülmesi için)
 
 db = sqlite3.connect('GirisCikis.db')
 conn = db.cursor()
@@ -22,7 +23,7 @@ conn = db.cursor()
 #     print('Verilere erişilemedi')
 
 tarihBicim = '%d.%m.%Y'
-saatBicim = '%H:%M:%S'
+saatBicim = '%H:%M'  # :%S
 
 
 def tarih():
@@ -40,18 +41,61 @@ def ani_ekle():
     print('Kayıt gerçekleştirildi.')
 
 
-def elle_ekle(t, s):
-    conn.execute("INSERT INTO veriler (tarih,saat) VALUES (?,?)",
-                 (t, s))
+def elle_ekle():
+    t = input_tarih()
+
+    # TODO: regex komutunu fonksiyon haline getir
+
+    matched = None
+    while matched is None:
+        s = input_saat()
+        matched = re.match(r'[0-2][0-9]:[0-5][0-9]', s)
+        # print(matched)
+        if matched is not None:
+            conn.execute("INSERT INTO veriler (tarih,saat) VALUES (?,?)",
+                         (t, s))
+        else:
+            print('Saat formatı 00:00 şeklinde olmalı.')
+
     db.commit()
 
 
-def elle_sil(t, s):
+def girdi_kontrol():
     try:
-        conn.execute("DELETE FROM veriler WHERE tarih = ? AND saat = ?",
-                     (t, s))
-    except SyntaxError:
+        return int(input('>>>'))
+    except ValueError:
+        print('Sayı giriniz.')
+
+
+def elle_sil_secenek():
+    print('1 - Belirli tarih ve saat')
+    print('2 - x tarihine sahip bütün kayıtlar')
+    print('3 - x saatine sahip bütün kayıtlar')
+
+
+def input_tarih():
+    return input('Tarih (Örn 01.01.2000) : ')
+
+
+def input_saat():
+    return input('Saat (Örn 01:01:01) : ')
+
+
+def elle_sil():
+    try:
+        elle_sil_secenek()
+        girdi = girdi_kontrol()
+        if girdi == 1:
+            conn.execute("DELETE FROM veriler WHERE tarih = ? AND saat = ?",
+                         (input_tarih(), input_saat()))
+        elif girdi == 2:
+            conn.execute("DELETE FROM veriler WHERE tarih = ?", (input_tarih(),))
+        elif girdi == 3:
+            conn.execute("DELETE FROM veriler WHERE saat = ?", (input_saat(),))
+    except ValueError:
         print('Eksik veya yanlış girdi.')
+
+    print('Silme işlemi gerçekleşirildi.')
     db.commit()
 
 
@@ -75,7 +119,7 @@ def sure_hesapla():
         # print('for: sure_hesapla, diff = ' + str(diff))
     # print('s_list = ' + str(s_list))
 
-    total = datetime.datetime.strptime('0:00:00', saatBicim)
+    total = datetime.datetime.strptime('0:00', saatBicim)  # :00
     for index in s_list:
         total = total + datetime.timedelta(hours=int(index[:-6]),
                                            minutes=int(index[-5:-3]),
@@ -101,18 +145,19 @@ def bosluk():
 def islemler():
     secenekler()
 
-    try:
-        girdi = int(input('>>>'))
-    except ValueError:
-        girdi = 0
-        print('Sayı giriniz.')
+    girdi = girdi_kontrol()
+    # try:
+    #     girdi = int(input('>>>'))
+    # except ValueError:
+    #     girdi = 0
+    #     print('Sayı giriniz.')
 
     if girdi == 1:
         ani_ekle()
     elif girdi == 2:
-        elle_ekle(input('Tarih (Örn 01.01.01) : '), input('Saat (Örn 01:01) : '))
+        elle_ekle()
     elif girdi == 3:
-        elle_sil(input('Tarih (Örn 01.01.01) : '), input('Saat (Örn 01:01) : '))
+        elle_sil()
     elif girdi == 4:
         veri_yazdir()
     elif girdi == 5:
@@ -125,6 +170,7 @@ def islemler():
         sys.exit()
     else:
         print('Gardaş seçenekler 1 den 6 e kadar. Yapma gözünü seveyim.')
+    bosluk()
 
 
 # try:
@@ -136,9 +182,10 @@ def islemler():
 while True:
     now = datetime.datetime.now()
     islemler()
-    bosluk()
 
 ###############################
 # Veri güncelleme
 ###############################
+
 # db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
+
