@@ -3,10 +3,9 @@ import datetime
 import sys
 import re
 
-# TODO: Database verilerini tarih - saat olarak küçükden büyüğe doğru sırala.
-
 db = sqlite3.connect('GirisCikis.db')
 conn = db.cursor()
+dt = datetime.datetime
 
 # ##############################
 # # Tablo oluşturma
@@ -107,11 +106,6 @@ def elle_sil():
     db.commit()
 
 
-def veri_yazdir():
-    for veri in conn.execute('SELECT tarih,saat FROM veriler'):
-        print(veri[0], veri[1])
-
-
 def dict_ts():
     # Dictionary with unsorted values
     dict_raw = {}
@@ -120,33 +114,35 @@ def dict_ts():
     return dict_raw
 
 
+def difference(s1, s2):
+    return dt.strptime(s2, saatBicim) - dt.strptime(s1, saatBicim)
+
+
 def sure_hesapla():
-    #  den önce ve sonrası için ayrı ayrı saat çıktısı
-    # s_list = []
-    # for arr in dict_ts().values():
-    #     sorted_arr = sorted(arr)
-    #     for s in sorted_arr:
-    #         if s <= '05:00':
+    print('{0:12s} {1:15s} {2:7s}'.format('Tarih', 'Saat', 'Süre'))
 
     s_list = []
-    # hergünün arrayinden max ve min saati bul ve birbirinden çıkartıp s_list e koyar
-    for arr in dict_ts().values():
-        s1 = min(arr)  # arr[0]
-        s2 = max(arr)  # arr[-1]
-        # print('Array min max: ' + s1 + ' - ' + s2)
-        diff = now.strptime(s2, saatBicim) - now.strptime(s1, saatBicim)
+    for key, arr in dict_ts().items():
+        diff = difference(min(arr), max(arr))
+        max_min_saat = min(arr) + ' > ' + max(arr)
+        print('{0:12s} {1:15s} {2:7s}'
+              .format(str(key), str(max_min_saat), str(diff)))
         s_list.append(str(diff))
-        # print('for: sure_hesapla, diff = ' + str(diff))
-    # print('s_list = ' + str(s_list))
 
-    total = datetime.datetime.strptime('0:00', saatBicim)  # :00
+    total = dt.strptime('0:00', saatBicim)
     for index in s_list:
         total = total + datetime.timedelta(hours=int(index[:-6]),
-                                           minutes=int(index[-5:-3]),
-                                           seconds=int(index[-2:]))
+                                           minutes=int(index[-5:-3]))
         # print('index = ' + index)
+    print()
+    print('Toplam süre = ' + total.strftime(saatBicim))
 
-    print('Total time = ' + total.strftime(saatBicim))
+
+def veri_yazdir():
+    # for veri in conn.execute('SELECT tarih,saat FROM veriler'):
+    #     print(veri[0], veri[1])
+    for i, j in dict_ts().items():
+        print(i, sorted(j))
 
 
 def secenekler():
@@ -164,14 +160,8 @@ def bosluk():
 
 def islemler():
     secenekler()
-
     girdi = girdi_kontrol()
-    # try:
-    #     girdi = int(input('>>>'))
-    # except ValueError:
-    #     girdi = 0
-    #     print('Sayı giriniz.')
-
+    print()
     if girdi == 1:
         ani_ekle()
     elif girdi == 2:
@@ -190,17 +180,12 @@ def islemler():
         sys.exit()
     else:
         print('Gardaş seçenekler 1 den 6 e kadar. Yapma gözünü seveyim.')
+    print()
     bosluk()
 
 
-# try:
-# input(r"Devam etmek için Enter'a basın...")
-# os.system('cls')
-# except SyntaxError:
-#     pass
-
 while True:
-    now = datetime.datetime.now()
+    now = dt.now()
     islemler()
 
     ###############################
