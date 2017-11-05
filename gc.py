@@ -3,8 +3,7 @@ import datetime
 import sys
 import re
 
-# TODO: Database verilerini tarih olarak küçükden büyüğe doğru sırala.
-# (Eskiye dönük tarih eklenmesi durumunda düzgün görülmesi için)
+# TODO: Database verilerini tarih - saat olarak küçükden büyüğe doğru sırala.
 
 db = sqlite3.connect('GirisCikis.db')
 conn = db.cursor()
@@ -34,29 +33,46 @@ def saat():
     return now.strftime(saatBicim)
 
 
+def input_tarih():
+    return input('Tarih (Örn 01.01.2000) : ')
+
+
+def input_saat():
+    return input('Saat (Örn 01:01) : ')
+
+
+def regex_saat():
+    matched = None
+    while matched is None:
+        s = input_saat()
+        matched = re.match(r'[0-2][0-9]:[0-5][0-9]', s)
+        if matched is not None:
+            return s
+        else:
+            print('Saat formatı 00:00 şeklinde olmalı.')
+
+
+def regex_tarih():
+    matched = None
+    while matched is None:
+        t = input_tarih()
+        matched = re.match(r'((([0]?[1-9])|([1-2][0-9]))|([3][0-1]))\.(([0]?[1-9])|([1][0-2]))\.([2]\d\d\d)', t)
+        if matched is not None:
+            return t
+        else:
+            print('Tarih formatı 01.01.2000 şeklinde olmalı.')
+
+
 def ani_ekle():
-    conn.execute("INSERT INTO veriler (tarih,saat) VALUES (?,?)",
+    conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
                  (tarih(), saat()))
     db.commit()
     print('Kayıt gerçekleştirildi.')
 
 
 def elle_ekle():
-    t = input_tarih()
-
-    # TODO: regex komutunu fonksiyon haline getir
-
-    matched = None
-    while matched is None:
-        s = input_saat()
-        matched = re.match(r'[0-2][0-9]:[0-5][0-9]', s)
-        # print(matched)
-        if matched is not None:
-            conn.execute("INSERT INTO veriler (tarih,saat) VALUES (?,?)",
-                         (t, s))
-        else:
-            print('Saat formatı 00:00 şeklinde olmalı.')
-
+    conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
+                 (regex_tarih(), regex_saat()))
     db.commit()
 
 
@@ -73,25 +89,17 @@ def elle_sil_secenek():
     print('3 - x saatine sahip bütün kayıtlar')
 
 
-def input_tarih():
-    return input('Tarih (Örn 01.01.2000) : ')
-
-
-def input_saat():
-    return input('Saat (Örn 01:01:01) : ')
-
-
 def elle_sil():
     try:
         elle_sil_secenek()
         girdi = girdi_kontrol()
         if girdi == 1:
-            conn.execute("DELETE FROM veriler WHERE tarih = ? AND saat = ?",
-                         (input_tarih(), input_saat()))
+            conn.execute('DELETE FROM veriler WHERE tarih = ? AND saat = ?',
+                         (regex_tarih(), regex_saat()))
         elif girdi == 2:
-            conn.execute("DELETE FROM veriler WHERE tarih = ?", (input_tarih(),))
+            conn.execute('DELETE FROM veriler WHERE tarih = ?', (regex_tarih(),))
         elif girdi == 3:
-            conn.execute("DELETE FROM veriler WHERE saat = ?", (input_saat(),))
+            conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
     except ValueError:
         print('Eksik veya yanlış girdi.')
 
@@ -104,16 +112,28 @@ def veri_yazdir():
         print(veri[0], veri[1])
 
 
-def sure_hesapla():
-    # Dict
-    dict_ts = {}
+def dict_ts():
+    # Dictionary with unsorted values
+    dict_raw = {}
     for veri in conn.execute('SELECT tarih, saat FROM veriler'):
-        dict_ts.setdefault(veri[0], []).append(veri[1])
+        dict_raw.setdefault(veri[0], []).append(veri[1])
+    return dict_raw
+
+
+def sure_hesapla():
+    #  den önce ve sonrası için ayrı ayrı saat çıktısı
+    # s_list = []
+    # for arr in dict_ts().values():
+    #     sorted_arr = sorted(arr)
+    #     for s in sorted_arr:
+    #         if s <= '05:00':
 
     s_list = []
-    for key in dict_ts.values():  # 04:00:00, ... ham günlük toplam süre
-        s1 = key[0]
-        s2 = key[-1]
+    # hergünün arrayinden max ve min saati bul ve birbirinden çıkartıp s_list e koyar
+    for arr in dict_ts().values():
+        s1 = min(arr)  # arr[0]
+        s2 = max(arr)  # arr[-1]
+        # print('Array min max: ' + s1 + ' - ' + s2)
         diff = now.strptime(s2, saatBicim) - now.strptime(s1, saatBicim)
         s_list.append(str(diff))
         # print('for: sure_hesapla, diff = ' + str(diff))
@@ -124,9 +144,9 @@ def sure_hesapla():
         total = total + datetime.timedelta(hours=int(index[:-6]),
                                            minutes=int(index[-5:-3]),
                                            seconds=int(index[-2:]))
-        print('index = ' + index)
+        # print('index = ' + index)
 
-    print('total = ' + total.strftime(saatBicim))
+    print('Total time = ' + total.strftime(saatBicim))
 
 
 def secenekler():
@@ -183,9 +203,8 @@ while True:
     now = datetime.datetime.now()
     islemler()
 
-###############################
-# Veri güncelleme
-###############################
+    ###############################
+    # Veri güncelleme
+    ###############################
 
-# db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
-
+    # db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
