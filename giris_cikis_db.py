@@ -3,32 +3,33 @@ import datetime
 import sys
 import re
 
-db = sqlite3.connect('GirisCikis.db')
+db = sqlite3.connect("C:/gcpy_db/GirisCikis.db")
 conn = db.cursor()
 dt = datetime.datetime
 
-# ##############################
-# # Tablo oluşturma
-# ##############################
-# db.execute('''CREATE TABLE IF NOT EXISTS
-#                   veriler (
-#                       tarih VARCHAR(50) NOT NULL,
-#                       saat VARCHAR(50) NOT NULL
-#                       )''')
-# if db:
-#     print('Verilere erişildi.')
-# else:
-#     print('Verilere erişilemedi')
+##############################
+# Tablo oluşturma
+##############################
+db.execute('''CREATE TABLE IF NOT EXISTS
+                  veriler (
+                      tarih VARCHAR(50) NOT NULL,
+                      saat VARCHAR(50) NOT NULL
+                      )''')
+if db:
+    print('Verilere erişildi.')
+    print()
+else:
+    print('Verilere erişilemedi')
 
 tarihBicim = '%d.%m.%Y'
 saatBicim = '%H:%M'  # :%S
 
 
-def tarih():
+def tarih(now):
     return now.strftime(tarihBicim)
 
 
-def saat():
+def saat(now):
     return now.strftime(saatBicim)
 
 
@@ -55,24 +56,29 @@ def regex_tarih():
     matched = None
     while matched is None:
         t = input_tarih()
-        matched = re.match(r'((([0]?[1-9])|([1-2][0-9]))|([3][0-1]))\.(([0]?[1-9])|([1][0-2]))\.([2]\d\d\d)', t)
+        matched = re.match(r'((([0][1-9])|([1-2][0-9]))|([3][0-1]))\.(([0][1-9])|([1][0-2]))\.([2]\d\d\d)', t)
         if matched is not None:
             return t
         else:
             print('Tarih formatı 01.01.2000 şeklinde olmalı.')
 
 
-def ani_ekle():
-    conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
-                 (tarih(), saat()))
-    db.commit()
+def kayit_msg():
     print('Kayıt gerçekleştirildi.')
+
+
+def ani_ekle(now):
+    conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
+                 (tarih(now), saat(now)))
+    db.commit()
+    kayit_msg()
 
 
 def elle_ekle():
     conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
                  (regex_tarih(), regex_saat()))
     db.commit()
+    kayit_msg()
 
 
 def girdi_kontrol():
@@ -86,6 +92,7 @@ def elle_sil_secenek():
     print('1 - Belirli tarih ve saat')
     print('2 - x tarihine sahip bütün kayıtlar')
     print('3 - x saatine sahip bütün kayıtlar')
+    print('4 - Ana menü')
 
 
 def elle_sil():
@@ -99,10 +106,12 @@ def elle_sil():
             conn.execute('DELETE FROM veriler WHERE tarih = ?', (regex_tarih(),))
         elif girdi == 3:
             conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
+        elif girdi == 4:
+            return
+        if girdi == 1 or 2 or 3:
+            print('Silme işlemi gerçekleşirildi.')
     except ValueError:
         print('Eksik veya yanlış girdi.')
-
-    print('Silme işlemi gerçekleşirildi.')
     db.commit()
 
 
@@ -154,16 +163,24 @@ def secenekler():
     print('6 - Çıkış')
 
 
+def cikis():
+    db.close()
+    print('Veriler kayıt edildi.')
+    print('Çıkmak için Enter a basın.')
+    input('')
+    sys.exit()
+
+
 def bosluk():
     print('-------------------')
 
 
-def islemler():
+def islemler(now):
     secenekler()
     girdi = girdi_kontrol()
     print()
     if girdi == 1:
-        ani_ekle()
+        ani_ekle(now)
     elif girdi == 2:
         elle_ekle()
     elif girdi == 3:
@@ -173,20 +190,12 @@ def islemler():
     elif girdi == 5:
         sure_hesapla()
     elif girdi == 6:
-        db.close()
-        print('Veriler kayıt edildi.')
-        print('Çıkmak için Enter a basın.')
-        input('')
-        sys.exit()
+        cikis()
     else:
-        print('Gardaş seçenekler 1 den 6 e kadar. Yapma gözünü seveyim.')
+        print('Gardaş seçenekler 1 den 6 ya kadar. Yapma gözünü seveyim.')
     print()
     bosluk()
 
-
-while True:
-    now = dt.now()
-    islemler()
 
     ###############################
     # Veri güncelleme
