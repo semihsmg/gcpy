@@ -89,10 +89,9 @@ def girdi_kontrol():
 
 
 def elle_sil_secenek():
-    print('1 - Belirli tarih ve saat')
+    print('1 - Belirli tarihden saat sil')
     print('2 - x tarihine sahip bütün kayıtlar')
-    print('3 - x saatine sahip bütün kayıtlar')
-    print('4 - Ana menü')
+    print('3 - Ana menü')
 
 
 def elle_sil():
@@ -104,11 +103,11 @@ def elle_sil():
                          (regex_tarih(), regex_saat()))
         elif girdi == 2:
             conn.execute('DELETE FROM veriler WHERE tarih = ?', (regex_tarih(),))
+        # elif girdi == 3:
+        #     conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
         elif girdi == 3:
-            conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
-        elif girdi == 4:
             return
-        if girdi == 1 or 2 or 3:
+        if girdi == 1 or 2:  # or 3
             print('Silme işlemi gerçekleşirildi.')
     except ValueError:
         print('Eksik veya yanlış girdi.')
@@ -118,9 +117,13 @@ def elle_sil():
 def dict_ts():
     # Dictionary with unsorted values
     dict_raw = {}
+    dict_sort = {}
     for veri in conn.execute('SELECT tarih, saat FROM veriler'):
         dict_raw.setdefault(veri[0], []).append(veri[1])
-    return dict_raw
+    for i, j in dict_raw.items():
+        dict_sort.setdefault(i, sorted(j))
+
+    return dict_sort
 
 
 def difference(s1, s2):
@@ -133,9 +136,9 @@ def sure_hesapla():
     s_list = []
     for key, arr in dict_ts().items():
         diff = difference(min(arr), max(arr))
-        max_min_saat = min(arr) + ' > ' + max(arr)
+        max_min_saat = str(min(arr) + ' > ' + max(arr))
         print('{0:12s} {1:15s} {2:7s}'
-              .format(str(key), str(max_min_saat), str(diff)))
+              .format(str(key), max_min_saat, str(diff)))
         s_list.append(str(diff))
 
     total = dt.strptime('0:00', saatBicim)
@@ -144,6 +147,7 @@ def sure_hesapla():
                                            minutes=int(index[-5:-3]))
         # print('index = ' + index)
     print()
+    print('Toplam gün = ', len(dict_ts().keys()))
     print('Toplam süre = ' + total.strftime(saatBicim))
 
 
@@ -151,7 +155,7 @@ def veri_yazdir():
     # for veri in conn.execute('SELECT tarih,saat FROM veriler'):
     #     print(veri[0], veri[1])
     for i, j in dict_ts().items():
-        print(i, sorted(j))
+        print(i, j)  # sorted(j)
 
 
 def secenekler():
@@ -196,9 +200,8 @@ def islemler(now):
     print()
     bosluk()
 
+###############################
+# Veri güncelleme
+###############################
 
-    ###############################
-    # Veri güncelleme
-    ###############################
-
-    # db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
+# db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
