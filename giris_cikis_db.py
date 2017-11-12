@@ -115,7 +115,7 @@ def elle_sil():
 
 
 def dict_ts():
-    # Dictionary with unsorted values
+    # Creating dictionary with sorted time values
     dict_raw = {}
     dict_sort = {}
     for veri in conn.execute('SELECT tarih, saat FROM veriler'):
@@ -126,29 +126,66 @@ def dict_ts():
     return dict_sort
 
 
+def table_saat_str(s1, s2):
+    return str(s1 + ' > ' + s2)
+
+
+def table_str(key, table_saat, diff):
+    print('{0:12s} {1:15s} {2:7s}'.format(key, table_saat, diff))
+
+
 def difference(s1, s2):
     return dt.strptime(s2, saatBicim) - dt.strptime(s1, saatBicim)
 
 
-def sure_hesapla():
+def sure_hesapla():  # Mesai içinde ve dışında kalan çalışma saatlerini ayrı ayrı hesaplama
     print('{0:12s} {1:15s} {2:7s}'.format('Tarih', 'Saat', 'Süre'))
 
-    s_list = []
+    list_1 = []
+    list_2 = []
+    mesai_bitis = '17:30'
     for key, arr in dict_ts().items():
-        diff = difference(min(arr), max(arr))
-        max_min_saat = str(min(arr) + ' > ' + max(arr))
-        print('{0:12s} {1:15s} {2:7s}'
-              .format(str(key), max_min_saat, str(diff)))
-        s_list.append(str(diff))
+        if max(arr) <= mesai_bitis:
+            list_1.append(str(difference(min(arr), max(arr))))
+        else:
+            list_1.append(str(difference(min(arr), mesai_bitis)))
+            list_2.append(str(difference(mesai_bitis, max(arr))))
+        table_str(str(key), table_saat_str(min(arr), max(arr)), str(difference(min(arr), max(arr))))
 
-    total = dt.strptime('0:00', saatBicim)
-    for index in s_list:
-        total = total + datetime.timedelta(hours=int(index[:-6]),
-                                           minutes=int(index[-5:-3]))
-        # print('index = ' + index)
+    print('l1', list_1)
+    print('l2', list_2)
+
+    # TODO: total değerlerine arıyetten days propety de eklemeli çünkü toplam saat 23:59 u geçtikten sonra saat kısmına gün değerini girip dakikaya da saat girioyor.
+
+    total_1 = dt.strptime('00:00', saatBicim)
+    total_2 = dt.strptime('00:00', saatBicim)
+    for index in list_1:
+        hrs, mins, secs = index.split(':')
+        total_1 = total_1 + datetime.timedelta(days=0, hours=int(hrs),
+                                               minutes=int(mins))
+    for index in list_2:
+        hrs, mins, secs = index.split(':')
+        total_2 = total_2 + datetime.timedelta(days=0, hours=int(hrs),
+                                               minutes=int(mins))
     print()
     print('Toplam gün = ', len(dict_ts().keys()))
-    print('Toplam süre = ' + total.strftime(saatBicim))
+    print('Toplam mesai = ' + total_1.strftime(saatBicim))
+    print('Toplam fazla mesai = ' + total_2.strftime(saatBicim))
+
+    # s_list = []
+    # for key, arr in dict_ts().items():
+    #     diff = difference(min(arr), max(arr))
+    #     s_list.append(str(diff))
+    #     table_str(str(key), table_saat_str(min(arr), max(arr)), str(diff))
+
+    # total = dt.strptime('00:00', saatBicim)
+    # for index in s_list:
+    #     total = total + datetime.timedelta(hours=int(index[:-6]),
+    #                                        minutes=int(index[-5:-3]))
+    #     # print('index = ' + index)
+    # print()
+    # print('Toplam gün = ', len(dict_ts().keys()))
+    # print('Toplam süre = ' + total.strftime(saatBicim))
 
 
 def veri_yazdir():
