@@ -23,6 +23,7 @@ else:
 
 tarihBicim = '%d.%m.%Y'
 saatBicim = '%H:%M'  # :%S
+saatBicim_gunle = '%d:%H:%M'  # :%S
 
 
 def tarih(now):
@@ -96,19 +97,24 @@ def elle_sil_secenek():
 
 def elle_sil():
     try:
-        elle_sil_secenek()
-        girdi = girdi_kontrol()
-        if girdi == 1:
-            conn.execute('DELETE FROM veriler WHERE tarih = ? AND saat = ?',
-                         (regex_tarih(), regex_saat()))
-        elif girdi == 2:
-            conn.execute('DELETE FROM veriler WHERE tarih = ?', (regex_tarih(),))
-        # elif girdi == 3:
-        #     conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
-        elif girdi == 3:
-            return
-        if girdi == 1 or 2:  # or 3
-            print('Silme işlemi gerçekleşirildi.')
+        move_on = False
+        while not move_on:
+            elle_sil_secenek()
+            girdi = girdi_kontrol()
+            if girdi == 1:
+                conn.execute('DELETE FROM veriler WHERE tarih = ? AND saat = ?',
+                             (regex_tarih(), regex_saat()))
+            elif girdi == 2:
+                conn.execute('DELETE FROM veriler WHERE tarih = ?', (regex_tarih(),))
+            # elif girdi == 3:
+            #     conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
+            elif girdi == 3:
+                return
+            if girdi == (1 or 2):  # or 3
+                print('Silme işlemi gerçekleşirildi.')
+                move_on = True
+            else:
+                print('Seçenekler arasında ' + str(girdi) + ' mevcut değil.')
     except ValueError:
         print('Eksik veya yanlış girdi.')
     db.commit()
@@ -150,26 +156,24 @@ def sure_hesapla():  # Mesai içinde ve dışında kalan çalışma saatlerini a
         else:
             list_1.append(str(difference(min(arr), mesai_bitis)))
             list_2.append(str(difference(mesai_bitis, max(arr))))
-        table_str(str(key), table_saat_str(min(arr), max(arr)), str(difference(min(arr), max(arr))))
+        table_str(str(key), table_saat_str(min(arr), max(arr)),
+                  str(difference(min(arr), max(arr))))
 
-    print('l1', list_1)
-    print('l2', list_2)
-
-    # TODO: total değerlerine arıyetten days propety de eklemeli çünkü toplam saat 23:59 u geçtikten sonra saat kısmına gün değerini girip dakikaya da saat girioyor.
-
-    total_1 = dt.strptime('00:00', saatBicim)
+    total_1 = dt.strptime('01:00:00', saatBicim_gunle)
     total_2 = dt.strptime('00:00', saatBicim)
     for index in list_1:
         hrs, mins, secs = index.split(':')
-        total_1 = total_1 + datetime.timedelta(days=0, hours=int(hrs),
+        total_1 = total_1 + datetime.timedelta(days=00, hours=int(hrs),
                                                minutes=int(mins))
     for index in list_2:
         hrs, mins, secs = index.split(':')
-        total_2 = total_2 + datetime.timedelta(days=0, hours=int(hrs),
+        total_2 = total_2 + datetime.timedelta(hours=int(hrs),
                                                minutes=int(mins))
     print()
     print('Toplam gün = ', len(dict_ts().keys()))
-    print('Toplam mesai = ' + total_1.strftime(saatBicim))
+    d, h, m = str(total_1.strftime(saatBicim_gunle)).split(':')
+    print('Toplam mesai = ' + str(int(d) - 1) + ' gün + '
+          + h + ':' + m + ' = ' + str((((int(d) - 1) * 24) + int(h))) + ':' + m)
     print('Toplam fazla mesai = ' + total_2.strftime(saatBicim))
 
     # s_list = []
