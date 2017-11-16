@@ -6,14 +6,16 @@ import re
 db = sqlite3.connect("C:/gcpy_db/GirisCikis.db")
 conn = db.cursor()
 dt = datetime.datetime
+file_name = "C:/gcpy_db/calc.txt"
+file = open(file_name, "w")
 
 ##############################
 # Tablo oluşturma
 ##############################
 db.execute('''CREATE TABLE IF NOT EXISTS
                   veriler (
-                      tarih VARCHAR(50) NOT NULL,
-                      saat VARCHAR(50) NOT NULL
+                      date VARCHAR(50) NOT NULL,
+                      time VARCHAR(50) NOT NULL
                       )''')
 if db:
     print('Verilere erişildi.')
@@ -21,31 +23,31 @@ if db:
 else:
     print('Verilere erişilemedi')
 
-tarihBicim = '%d.%m.%Y'
-saatBicim = '%H:%M'  # :%S
-saatBicim_gunle = '%d:%H:%M'  # :%S
+dateFormat = '%d.%m.%Y'
+timeFormat = '%H:%M'  # :%S
+timeFormat_with_day = '%d:%H:%M'  # :%S
 
 
-def tarih(now):
-    return now.strftime(tarihBicim)
+def date(now):
+    return now.strftime(dateFormat)
 
 
-def saat(now):
-    return now.strftime(saatBicim)
+def time(now):
+    return now.strftime(timeFormat)
 
 
-def input_tarih():
+def user_input_date():
     return input('Tarih (Örn 01.01.2000) : ')
 
 
-def input_saat():
+def user_input_time():
     return input('Saat (Örn 01:01) : ')
 
 
-def regex_saat():
+def regex_time():
     matched = None
     while matched is None:
-        s = input_saat()
+        s = user_input_time()
         matched = re.match(r'[0-2][0-9]:[0-5][0-9]', s)
         if matched is not None:
             return s
@@ -53,10 +55,10 @@ def regex_saat():
             print('Saat formatı 00:00 şeklinde olmalı.')
 
 
-def regex_tarih():
+def regex_date():
     matched = None
     while matched is None:
-        t = input_tarih()
+        t = user_input_date()
         matched = re.match(r'((([0][1-9])|([1-2][0-9]))|([3][0-1]))\.(([0][1-9])|([1][0-2]))\.([2]\d\d\d)', t)
         if matched is not None:
             return t
@@ -64,57 +66,55 @@ def regex_tarih():
             print('Tarih formatı 01.01.2000 şeklinde olmalı.')
 
 
-def kayit_msg():
+def record_msg():
     print('Kayıt gerçekleştirildi.')
 
 
-def ani_ekle(now):
-    conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
-                 (tarih(now), saat(now)))
+def add_now(now):
+    conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
+                 (date(now), time(now)))
     db.commit()
-    kayit_msg()
+    record_msg()
 
 
-def elle_ekle():
-    conn.execute('INSERT INTO veriler (tarih,saat) VALUES (?,?)',
-                 (regex_tarih(), regex_saat()))
+def add_manual():
+    conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
+                 (regex_date(), regex_time()))
     db.commit()
-    kayit_msg()
+    record_msg()
 
 
-def girdi_kontrol():
+def user_input_kontrol():
     try:
         return int(input('>>>'))
     except ValueError:
         print('Sayı giriniz.')
 
 
-def elle_sil_secenek():
+def del_manual_secenek():
     print('1 - Belirli tarihden saat sil')
     print('2 - x tarihine sahip bütün kayıtlar')
     print('3 - Ana menü')
 
 
-def elle_sil():
+def del_manual():
     try:
         move_on = False
         while not move_on:
-            elle_sil_secenek()
-            girdi = girdi_kontrol()
-            if girdi == 1:
-                conn.execute('DELETE FROM veriler WHERE tarih = ? AND saat = ?',
-                             (regex_tarih(), regex_saat()))
-            elif girdi == 2:
-                conn.execute('DELETE FROM veriler WHERE tarih = ?', (regex_tarih(),))
-            # elif girdi == 3:
-            #     conn.execute('DELETE FROM veriler WHERE saat = ?', (regex_saat(),))
-            elif girdi == 3:
+            del_manual_secenek()
+            user_input = user_input_kontrol()
+            if user_input == 1:
+                conn.execute('DELETE FROM veriler WHERE date = ? AND time = ?',
+                             (regex_date(), regex_time()))
+            elif user_input == 2:
+                conn.execute('DELETE FROM veriler WHERE date = ?', (regex_date(),))
+            elif user_input == 3:
                 return
-            if girdi == (1 or 2):  # or 3
+            if user_input == (1 or 2):  # or 3
                 print('Silme işlemi gerçekleşirildi.')
                 move_on = True
             else:
-                print('Seçenekler arasında ' + str(girdi) + ' mevcut değil.')
+                print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.')
     except ValueError:
         print('Eksik veya yanlış girdi.')
     db.commit()
@@ -124,7 +124,7 @@ def dict_ts():
     # Creating dictionary with sorted time values
     dict_raw = {}
     dict_sort = {}
-    for veri in conn.execute('SELECT tarih, saat FROM veriler'):
+    for veri in conn.execute('SELECT date, time FROM veriler'):
         dict_raw.setdefault(veri[0], []).append(veri[1])
     for i, j in dict_raw.items():
         dict_sort.setdefault(i, sorted(j))
@@ -132,68 +132,83 @@ def dict_ts():
     return dict_sort
 
 
-def table_saat_str(s1, s2):
+def table_time_str(s1, s2):
     return str(s1 + ' > ' + s2)
 
 
-def table_str(key, table_saat, diff):
-    print('{0:12s} {1:15s} {2:7s}'.format(key, table_saat, diff))
+def table_str(key, table_time, diff):
+    info = '{0:12s} {1:15s} {2:7s}'.format(key, table_time, diff)
+    print(info)
+    file.write(info + '\n')
 
 
 def difference(s1, s2):
-    return dt.strptime(s2, saatBicim) - dt.strptime(s1, saatBicim)
+    return dt.strptime(s2, timeFormat) - dt.strptime(s1, timeFormat)
 
 
-def sure_hesapla():  # Mesai içinde ve dışında kalan çalışma saatlerini ayrı ayrı hesaplama
-    print('{0:12s} {1:15s} {2:7s}'.format('Tarih', 'Saat', 'Süre'))
+def txt_write(line):
+    file.write(line)
 
-    list_1 = []
-    list_2 = []
-    mesai_bitis = '17:30'
+
+def txt_writelines(lines):
+    file.writelines(lines)
+
+
+def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayrı ayrı hesaplama
+    table_title = '{0:12s} {1:15s} {2:7s}'.format('Tarih', 'Saat', 'Süre')
+    print(table_title)
+    txt_write(table_title + '\n')
+
+    before_1730_list = []
+    after_1730_list = []
+    time_to_leave = '17:30'
     for key, arr in dict_ts().items():
-        if max(arr) <= mesai_bitis:
-            list_1.append(str(difference(min(arr), max(arr))))
+        if max(arr) <= time_to_leave:
+            before_1730_list.append(str(difference(min(arr), max(arr))))
         else:
-            list_1.append(str(difference(min(arr), mesai_bitis)))
-            list_2.append(str(difference(mesai_bitis, max(arr))))
-        table_str(str(key), table_saat_str(min(arr), max(arr)),
+            before_1730_list.append(str(difference(min(arr), time_to_leave)))
+            after_1730_list.append(str(difference(time_to_leave, max(arr))))
+        table_str(str(key), table_time_str(min(arr), max(arr)),
                   str(difference(min(arr), max(arr))))
 
-    total_1 = dt.strptime('01:00:00', saatBicim_gunle)
-    total_2 = dt.strptime('00:00', saatBicim)
-    for index in list_1:
+    total_1 = dt.strptime('01:00:00', timeFormat_with_day)
+    total_2 = dt.strptime('00:00', timeFormat)
+    for index in before_1730_list:
         hrs, mins, secs = index.split(':')
         total_1 = total_1 + datetime.timedelta(days=00, hours=int(hrs),
                                                minutes=int(mins))
-    for index in list_2:
+    for index in after_1730_list:
         hrs, mins, secs = index.split(':')
         total_2 = total_2 + datetime.timedelta(hours=int(hrs),
                                                minutes=int(mins))
-    print()
-    print('Toplam gün = ', len(dict_ts().keys()))
-    d, h, m = str(total_1.strftime(saatBicim_gunle)).split(':')
-    print('Toplam mesai = ' + str(int(d) - 1) + ' gün + '
-          + h + ':' + m + ' = ' + str((((int(d) - 1) * 24) + int(h))) + ':' + m)
-    print('Toplam fazla mesai = ' + total_2.strftime(saatBicim))
+    number_of_days = 'Toplam gün = ' + str(len(dict_ts().keys()))
+    d, h, m = str(total_1.strftime(timeFormat_with_day)).split(':')
+    shift = 'Toplam mesai = ' + str(int(d) - 1) + ' gün + ' \
+            + h + ':' + m + ' = ' + str((((int(d) - 1) * 24) + int(h))) + ':' + m
+    extra_shift = 'Toplam fazla mesai = ' + total_2.strftime(timeFormat)
+    print('\n' + number_of_days + '\n' + shift + '\n' + extra_shift)
+
+    list_of_calc = ['\n', number_of_days + '\n', shift + '\n', extra_shift + '\n']
+    txt_writelines(list_of_calc)
 
     # s_list = []
     # for key, arr in dict_ts().items():
     #     diff = difference(min(arr), max(arr))
     #     s_list.append(str(diff))
-    #     table_str(str(key), table_saat_str(min(arr), max(arr)), str(diff))
+    #     table_str(str(key), table_time_str(min(arr), max(arr)), str(diff))
 
-    # total = dt.strptime('00:00', saatBicim)
+    # total = dt.strptime('00:00', timeFormat)
     # for index in s_list:
     #     total = total + datetime.timedelta(hours=int(index[:-6]),
     #                                        minutes=int(index[-5:-3]))
     #     # print('index = ' + index)
     # print()
     # print('Toplam gün = ', len(dict_ts().keys()))
-    # print('Toplam süre = ' + total.strftime(saatBicim))
+    # print('Toplam süre = ' + total.strftime(timeFormat))
 
 
-def veri_yazdir():
-    # for veri in conn.execute('SELECT tarih,saat FROM veriler'):
+def print_data():
+    # for veri in conn.execute('SELECT date,time FROM veriler'):
     #     print(veri[0], veri[1])
     for i, j in dict_ts().items():
         print(i, j)  # sorted(j)
@@ -210,6 +225,7 @@ def secenekler():
 
 def cikis():
     db.close()
+    file.close()
     print('Veriler kayıt edildi.')
     print('Çıkmak için Enter a basın.')
     input('')
@@ -220,21 +236,21 @@ def bosluk():
     print('-------------------')
 
 
-def islemler(now):
+def operations(now):
     secenekler()
-    girdi = girdi_kontrol()
+    user_input = user_input_kontrol()
     print()
-    if girdi == 1:
-        ani_ekle(now)
-    elif girdi == 2:
-        elle_ekle()
-    elif girdi == 3:
-        elle_sil()
-    elif girdi == 4:
-        veri_yazdir()
-    elif girdi == 5:
-        sure_hesapla()
-    elif girdi == 6:
+    if user_input == 1:
+        add_now(now)
+    elif user_input == 2:
+        add_manual()
+    elif user_input == 3:
+        del_manual()
+    elif user_input == 4:
+        print_data()
+    elif user_input == 5:
+        calc_time()
+    elif user_input == 6:
         cikis()
     else:
         print('Gardaş seçenekler 1 den 6 ya kadar. Yapma gözünü seveyim.')
@@ -245,4 +261,4 @@ def islemler(now):
 # Veri güncelleme
 ###############################
 
-# db.execute("UPDATE veriler SET tarih='25.10.17' WHERE tarih='23.10.17'")
+# db.execute("UPDATE veriler SET date='25.10.17' WHERE date='23.10.17'")

@@ -1,5 +1,5 @@
 import giris_cikis_db as gc
 
-gc.sure_hesapla()
+gc.calc_time()
 print()
 gc.cikis()
