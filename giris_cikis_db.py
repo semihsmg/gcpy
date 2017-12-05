@@ -9,9 +9,7 @@ dt = datetime.datetime
 file_name = "C:/gcpy_db/calc.txt"
 file = open(file_name, "w")
 
-##############################
 # Tablo oluşturma
-##############################
 db.execute('''CREATE TABLE IF NOT EXISTS
                   veriler (
                       date VARCHAR(50) NOT NULL,
