@@ -257,6 +257,5 @@ def operations(now):
 
 ###############################
 # Veri güncelleme
-###############################
 
 # db.execute("UPDATE veriler SET date='25.10.17' WHERE date='23.10.17'")
