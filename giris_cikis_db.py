@@ -3,10 +3,13 @@ import datetime
 import sys
 import re
 
-db = sqlite3.connect("C:/gcpy_db/GirisCikis.db")
-conn = db.cursor()
 dt = datetime.datetime
-file_name = "C:/gcpy_db/calc.txt"
+this_date = dt.today()
+
+db = sqlite3.connect("C:/gcpy_db/" + str(this_date.month) + "_" + str(this_date.year) + ".db")
+conn = db.cursor()
+
+file_name = "C:/gcpy_db/" + str(this_date.month) + "_" + str(this_date.year) + ".txt"
 file = open(file_name, "w")
 
 # Tablo oluşturma
@@ -255,7 +258,5 @@ def operations(now):
     print()
     line()
 
-###############################
 # Veri güncelleme
-
 # db.execute("UPDATE veriler SET date='25.10.17' WHERE date='23.10.17'")
