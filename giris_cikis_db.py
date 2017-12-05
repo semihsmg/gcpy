@@ -84,7 +84,7 @@ def add_manual():
     record_msg()
 
 
-def user_input_kontrol():
+def user_input_control():
     try:
         return int(input('>>>'))
     except ValueError:
@@ -102,7 +102,7 @@ def del_manual():
         move_on = False
         while not move_on:
             del_manual_secenek()
-            user_input = user_input_kontrol()
+            user_input = user_input_control()
             if user_input == 1:
                 conn.execute('DELETE FROM veriler WHERE date = ? AND time = ?',
                              (regex_date(), regex_time()))
@@ -214,7 +214,7 @@ def print_data():
         print(i, j)  # sorted(j)
 
 
-def secenekler():
+def choices():
     print('1 - Giriş kaydı')
     print('2 - Veri ekle')
     print('3 - Veri sil')
@@ -223,7 +223,7 @@ def secenekler():
     print('6 - Çıkış')
 
 
-def cikis():
+def exit_app():
     db.close()
     file.close()
     print('Veriler kayıt edildi.')
@@ -232,13 +232,13 @@ def cikis():
     sys.exit()
 
 
-def bosluk():
+def line():
     print('-------------------')
 
 
 def operations(now):
-    secenekler()
-    user_input = user_input_kontrol()
+    choices()
+    user_input = user_input_control()
     print()
     if user_input == 1:
         add_now(now)
@@ -251,11 +251,11 @@ def operations(now):
     elif user_input == 5:
         calc_time()
     elif user_input == 6:
-        cikis()
+        exit_app()
     else:
         print('Gardaş seçenekler 1 den 6 ya kadar. Yapma gözünü seveyim.')
     print()
-    bosluk()
+    line()
 
 ###############################
 # Veri güncelleme
