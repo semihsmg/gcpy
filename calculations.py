@@ -188,7 +188,7 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
     d, h, m = str(total_1.strftime(timeFormat_with_day)).split(':')
     shift = 'Toplam mesai = ' + str(int(d) - 1) + ' gün + ' \
             + h + ':' + m + ' = ' + str((((int(d) - 1) * 24) + int(h))) + ':' + m
-    extra_shift = 'Toplam fazla mesai = (15:30 dan sonra)' + total_2.strftime(timeFormat)
+    extra_shift = 'Toplam fazla mesai (15:30 dan sonra) = ' + total_2.strftime(timeFormat)
     print('\n' + number_of_days + '\n' + shift + '\n' + extra_shift)
 
     list_of_calc = ['\n', number_of_days + '\n', shift + '\n', extra_shift + '\n']
