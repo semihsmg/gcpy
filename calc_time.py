@@ -1,4 +1,4 @@
-import giris_cikis_db as gc
+import calculations as gc
 
 gc.calc_time()
 print()

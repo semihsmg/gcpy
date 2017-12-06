@@ -3,13 +3,15 @@ import datetime
 import sys
 import re
 
+destination = "C:/gcpy/"
+
 dt = datetime.datetime
 this_date = dt.today()
 
-db = sqlite3.connect("C:/gcpy_db/" + str(this_date.month) + "_" + str(this_date.year) + ".db")
+db = sqlite3.connect(destination + str(this_date.month) + "_" + str(this_date.year) + ".db")
 conn = db.cursor()
 
-file_name = "C:/gcpy_db/" + str(this_date.month) + "_" + str(this_date.year) + ".txt"
+file_name = destination + str(this_date.month) + "_" + str(this_date.year) + ".txt"
 file = open(file_name, "w")
 
 # Tablo oluşturma

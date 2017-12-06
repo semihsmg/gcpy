@@ -1,4 +1,4 @@
-import giris_cikis_db as gc
+import calculations as gc
 
 while True:
     gc.operations(gc.dt.now())
