@@ -99,26 +99,26 @@ def del_manual_secenek():
 
 
 def del_manual():
-    try:
-        move_on = False
-        while not move_on:
-            del_manual_secenek()
-            user_input = user_input_control()
-            if user_input == 1:
-                conn.execute('DELETE FROM veriler WHERE date = ? AND time = ?',
-                             (regex_date(), regex_time()))
-            elif user_input == 2:
-                conn.execute('DELETE FROM veriler WHERE date = ?', (regex_date(),))
-            elif user_input == 3:
-                return
-            if user_input == (1 or 2):  # or 3
+    move_on = False
+    while not move_on:
+        del_manual_secenek()
+        user_input = user_input_control()
+        if user_input == 1:
+            conn.execute('DELETE FROM veriler WHERE date = ? AND time = ?',
+                         (regex_date(), regex_time()))
+        elif user_input == 2:
+            conn.execute('DELETE FROM veriler WHERE date = ?', (regex_date(),))
+        elif user_input == 3:
+            return
+        if user_input == (1 or 2 or 3):
+            if user_input == (1 or 2):
                 print('Silme işlemi gerçekleşirildi.')
-                move_on = True
-            else:
-                print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.')
-    except ValueError:
-        print('Eksik veya yanlış girdi.')
-    db.commit()
+            move_on = True
+        else:
+            print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.')
+
+
+db.commit()
 
 
 def dict_ts():
@@ -147,8 +147,8 @@ def difference(s1, s2):
     return dt.strptime(s2, timeFormat) - dt.strptime(s1, timeFormat)
 
 
-def txt_write(line):
-    file.write(line)
+def txt_write(v_line):
+    file.write(v_line)
 
 
 def txt_writelines(lines):
@@ -186,7 +186,7 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
     d, h, m = str(total_1.strftime(timeFormat_with_day)).split(':')
     shift = 'Toplam mesai = ' + str(int(d) - 1) + ' gün + ' \
             + h + ':' + m + ' = ' + str((((int(d) - 1) * 24) + int(h))) + ':' + m
-    extra_shift = 'Toplam fazla mesai = ' + total_2.strftime(timeFormat)
+    extra_shift = 'Toplam fazla mesai = (15:30 dan sonra)' + total_2.strftime(timeFormat)
     print('\n' + number_of_days + '\n' + shift + '\n' + extra_shift)
 
     list_of_calc = ['\n', number_of_days + '\n', shift + '\n', extra_shift + '\n']
