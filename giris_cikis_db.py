@@ -49,7 +49,7 @@ def regex_time():
     matched = None
     while matched is None:
         s = user_input_time()
-        matched = re.match(r'(([0-1][0-9])|([2][0-3])):[0-5][0-9]', s)
+        matched = re.match(r'(([0-1]\d)|([2][0-3])):[0-5]\d', s)
         if matched is not None:
             return s
         else:
@@ -60,7 +60,7 @@ def regex_date():
     matched = None
     while matched is None:
         t = user_input_date()
-        matched = re.match(r'((([0][1-9])|([1-2][0-9]))|([3][0-1]))\.(([0][1-9])|([1][0-2]))\.([2]\d\d\d)', t)
+        matched = re.match(r'((([0][1-9])|([1-2]\d))|([3][0-1]))\.(([0][1-9])|([1][0-2]))\.([2]\d\d\d)', t)
         if matched is not None:
             return t
         else:
@@ -92,7 +92,7 @@ def user_input_control():
         print('Sayı giriniz.')
 
 
-def del_manual_secenek():
+def del_manual_options():
     print('1 - Belirli tarihden saat sil')
     print('2 - x tarihine sahip bütün kayıtlar')
     print('3 - Ana menü')
@@ -101,7 +101,7 @@ def del_manual_secenek():
 def del_manual():
     move_on = False
     while not move_on:
-        del_manual_secenek()
+        del_manual_options()
         user_input = user_input_control()
         if user_input == 1:
             conn.execute('DELETE FROM veriler WHERE date = ? AND time = ?',
