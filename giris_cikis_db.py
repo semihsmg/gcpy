@@ -49,7 +49,7 @@ def regex_time():
     matched = None
     while matched is None:
         s = user_input_time()
-        matched = re.match(r'[0-2][0-9]:[0-5][0-9]', s)
+        matched = re.match(r'(([0-1][0-9])|([2][0-3])):[0-5][0-9]', s)
         if matched is not None:
             return s
         else:
