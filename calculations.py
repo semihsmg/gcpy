@@ -166,13 +166,15 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
     after_1730_list = []
     time_to_leave = '17:30'
     for key, arr in dict_ts().items():
-        if max(arr) <= time_to_leave:
-            before_1730_list.append(str(difference(min(arr), max(arr))))
+        min_value = min(arr)
+        max_value = max(arr)
+        if max_value <= time_to_leave:
+            before_1730_list.append(str(difference(min_value, max_value)))
         else:
-            before_1730_list.append(str(difference(min(arr), time_to_leave)))
-            after_1730_list.append(str(difference(time_to_leave, max(arr))))
-        table_str(str(key), table_time_str(min(arr), max(arr)),
-                  str(difference(min(arr), max(arr))))
+            before_1730_list.append(str(difference(min_value, time_to_leave)))
+            after_1730_list.append(str(difference(time_to_leave, max_value)))
+        table_str(str(key), table_time_str(min_value, max_value),
+                  str(difference(min_value, max_value)))
 
     total_1 = dt.strptime('01:00:00', timeFormat_with_day)
     total_2 = dt.strptime('00:00', timeFormat)
@@ -196,9 +198,9 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
 
     # s_list = []
     # for key, arr in dict_ts().items():
-    #     diff = difference(min(arr), max(arr))
+    #     diff = difference(min_value, max_value)
     #     s_list.append(str(diff))
-    #     table_str(str(key), table_time_str(min(arr), max(arr)), str(diff))
+    #     table_str(str(key), table_time_str(min_value, max_value), str(diff))
 
     # total = dt.strptime('00:00', timeFormat)
     # for index in s_list:
