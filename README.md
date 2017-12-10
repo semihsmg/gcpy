@@ -11,7 +11,7 @@ Pre-requisites
 Getting Started
 ---------------
 You can edit the destination variable in the calculations.py
-If do not you should create a C:/gcpy/ destination to your environment.
+If  you do not want to change it, should create a destination "C:/gcpy/" to your environment.
 
 Files
 ---------------
