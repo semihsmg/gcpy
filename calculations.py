@@ -11,9 +11,6 @@ this_date = dt.today()
 db = sqlite3.connect(destination + str(this_date.month) + "_" + str(this_date.year) + ".db")
 conn = db.cursor()
 
-file_name = destination + str(this_date.month) + "_" + str(this_date.year) + ".txt"
-file = open(file_name, "w")
-
 # Tablo oluşturma
 db.execute('''CREATE TABLE IF NOT EXISTS
                   veriler (
@@ -119,8 +116,7 @@ def del_manual():
         else:
             print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.')
 
-
-db.commit()
+        db.commit()
 
 
 def dict_ts():
@@ -139,28 +135,31 @@ def table_time_str(s1, s2):
     return str(s1 + ' > ' + s2)
 
 
-def table_str(key, table_time, diff):
+def difference(s1, s2):
+    return dt.strptime(s2, timeFormat) - dt.strptime(s1, timeFormat)
+
+
+def table_str(file, key, table_time, diff):
     info = '{0:12s} {1:15s} {2:7s}'.format(key, table_time, diff)
     print(info)
     file.write(info + '\n')
 
 
-def difference(s1, s2):
-    return dt.strptime(s2, timeFormat) - dt.strptime(s1, timeFormat)
-
-
-def txt_write(v_line):
+def txt_write(file, v_line):
     file.write(v_line)
 
 
-def txt_writelines(lines):
+def txt_writelines(file, lines):
     file.writelines(lines)
 
 
 def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayrı ayrı hesaplama
+    file_name = destination + str(this_date.month) + "_" + str(this_date.year) + ".txt"
+    file = open(file_name, "w")
+
     table_title = '{0:12s} {1:15s} {2:7s}'.format('Tarih', 'Saat', 'Süre')
     print(table_title)
-    txt_write(table_title + '\n')
+    txt_write(file, table_title + '\n')
 
     before_1730_list = []
     after_1730_list = []
@@ -173,11 +172,11 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
         else:
             before_1730_list.append(str(difference(min_value, time_to_leave)))
             after_1730_list.append(str(difference(time_to_leave, max_value)))
-        table_str(str(key), table_time_str(min_value, max_value),
-                  str(difference(min_value, max_value)))
+        table_str(file, str(key), table_time_str(min_value, max_value), str(difference(min_value, max_value)))
 
     total_1 = dt.strptime('01:00:00', timeFormat_with_day)
     total_2 = dt.strptime('00:00', timeFormat)
+    # TODO: Alttaki iki for loop ları fonksiyon haline getir
     for index in before_1730_list:
         hrs, mins, secs = index.split(':')
         total_1 = total_1 + datetime.timedelta(days=00, hours=int(hrs),
@@ -194,7 +193,8 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
     print('\n' + number_of_days + '\n' + shift + '\n' + extra_shift)
 
     list_of_calc = ['\n', number_of_days + '\n', shift + '\n', extra_shift + '\n']
-    txt_writelines(list_of_calc)
+    txt_writelines(file, list_of_calc)
+    file.close()
 
     # s_list = []
     # for key, arr in dict_ts().items():
@@ -230,7 +230,6 @@ def choices():
 
 def exit_app():
     db.close()
-    file.close()
     print('Veriler kayıt edildi.')
     print('Çıkmak için Enter a basın.')
     input('')
