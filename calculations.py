@@ -10,7 +10,7 @@ this_date = dt.today()
 
 db = sqlite3.connect(destination + str(this_date.month) + "_" + str(this_date.year) + ".db")
 conn = db.cursor()
-
+# TODO: txt ve db dosyalrını kendi klasörlerinde tut
 # Tablo oluşturma
 db.execute('''CREATE TABLE IF NOT EXISTS
                   veriler (
@@ -119,6 +119,51 @@ def del_manual():
         db.commit()
 
 
+def update_time_options():
+    print("1 - Tarihi değiştir")
+    print("2 - Bir tarihdeki saati değiştir")
+    print("3 - Ana menü")
+
+
+def update_time():
+    # Veri güncelleme
+    # conn.execute("UPDATE veriler SET date='25.10.17' WHERE date='23.10.17'")
+    move_on = False
+    while not move_on:
+        update_time_options()
+        user_input = user_input_control()
+        deger = user_input
+        if user_input == 1:
+            # Update date date
+            print("Değiştirmek istediğiniz gün:")
+            date_d2 = regex_date()
+            print("Yeni tarih değeri:")
+            date_d1 = regex_date()
+            conn.execute("UPDATE veriler SET date = ? WHERE date = ?",
+                         (date_d1, date_d2))
+        elif user_input == 2:
+            # Update specific time of the date
+            print("Güncellemeyi yapacağınız gün:")
+            date1 = regex_date()
+            print("Güncellemek istediğiniz saat:")
+            time1 = regex_time()
+            print("Yeni saat değeri:")
+            time2 = regex_time()
+            conn.execute("UPDATE veriler SET time = ? WHERE date = ? AND time = ?",
+                         (time2, date1, time1))
+        elif user_input == 3:
+            return
+
+        if user_input is 1 or 2 or 3:
+            if user_input is 1 or 2:
+                print('Veri güncelleme gerçekleşirildi.')
+            move_on = True
+        else:
+            print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.')
+
+        db.commit()
+
+
 def dict_ts():
     # Creating dictionary with sorted time values
     dict_raw = {}
@@ -176,7 +221,6 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
 
     total_1 = dt.strptime('01:00:00', timeFormat_with_day)
     total_2 = dt.strptime('00:00', timeFormat)
-    # TODO: Alttaki iki for loop ları fonksiyon haline getir
     for index in before_1730_list:
         hrs, mins, secs = index.split(':')
         total_1 = total_1 + datetime.timedelta(days=00, hours=int(hrs),
@@ -192,24 +236,9 @@ def calc_time():  # Mesai içinde ve dışında kalan çalışma saatlerini ayr�
     extra_shift = 'Toplam fazla mesai (15:30 dan sonra) = ' + total_2.strftime(timeFormat)
     print('\n' + number_of_days + '\n' + shift + '\n' + extra_shift)
 
-    list_of_calc = ['\n', number_of_days + '\n', shift + '\n', extra_shift + '\n']
+    list_of_calc = ['\n', number_of_days + '\n', shift + '\n', extra_shift]
     txt_writelines(file, list_of_calc)
     file.close()
-
-    # s_list = []
-    # for key, arr in dict_ts().items():
-    #     diff = difference(min_value, max_value)
-    #     s_list.append(str(diff))
-    #     table_str(str(key), table_time_str(min_value, max_value), str(diff))
-
-    # total = dt.strptime('00:00', timeFormat)
-    # for index in s_list:
-    #     total = total + datetime.timedelta(hours=int(index[:-6]),
-    #                                        minutes=int(index[-5:-3]))
-    #     # print('index = ' + index)
-    # print()
-    # print('Toplam gün = ', len(dict_ts().keys()))
-    # print('Toplam süre = ' + total.strftime(timeFormat))
 
 
 def print_data():
@@ -223,9 +252,10 @@ def choices():
     print('1 - Giriş kaydı')
     print('2 - Veri ekle')
     print('3 - Veri sil')
-    print('4 - Verileri yazdır')
-    print('5 - Süre hesapla')
-    print('6 - Çıkış')
+    print('4 - Veri Güncelle')
+    print('5 - Verileri yazdır')
+    print('6 - Süre hesapla')
+    print('7 - Çıkış')
 
 
 def exit_app():
@@ -251,15 +281,14 @@ def operations(now):
     elif user_input == 3:
         del_manual()
     elif user_input == 4:
-        print_data()
+        update_time()
     elif user_input == 5:
-        calc_time()
+        print_data()
     elif user_input == 6:
+        calc_time()
+    elif user_input == 7:
         exit_app()
     else:
-        print('Gardaş seçenekler 1 den 6 ya kadar. Yapma gözünü seveyim.')
+        print('Seçenekler 1 den 7 ye kadar. Yapma gözünü seveyim.')
     print()
     line()
-
-# Veri güncelleme
-# db.execute("UPDATE veriler SET date='25.10.17' WHERE date='23.10.17'")
