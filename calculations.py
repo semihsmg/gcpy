@@ -83,7 +83,7 @@ def regex_time():
 
 # Record message
 def record_msg():
-    print('Kayıt gerçekleştirildi.\nRecorded.')
+    print('Kayıt gerçekleştirildi \ Recorded')
 
 
 # Add a date and time instance to the database file of this moment
