@@ -11,8 +11,11 @@ this_date = dt.today()
 
 # Destination of the files
 destination = 'C:/gcpy'
+# name format of the files
 file_name = str(this_date.month) + '_' + str(this_date.year)
+# name format of the folder
 folder_name = destination + '/' + file_name + '/'
+# create a folder if exists do not raise error
 pathlib.Path(folder_name).mkdir(parents=True, exist_ok=True)
 
 # access (or create) database file '{month}_{year}.db'
