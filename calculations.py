@@ -99,6 +99,7 @@ def add_now(now):
     record_msg()
 
 
+# TODO: Bu güne farklı saat ekleme
 # Add a date and time record to the database file with user input
 def add_manual():
     conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
@@ -141,7 +142,7 @@ def del_manual():
             return
         if user_input == (1 or 2 or 3):
             if user_input == (1 or 2):
-                print('Silme işlemi gerçekleşirildi. \ Deletion is done')
+                print('Veri silindi \ Record deleted')
             move_on = True
         else:
             print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.'
