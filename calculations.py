@@ -2,20 +2,24 @@ import sqlite3
 import datetime
 import sys
 import re
-
-# Destination of the database file
-destination = "C:/gcpy/"
+import pathlib
 
 # datetime instance
 dt = datetime.datetime
 # Return the current local date to this_date
 this_date = dt.today()
 
-# access (or create) database file "{month}_{year}.db"
-db = sqlite3.connect(destination + str(this_date.month) + "_" + str(this_date.year) + ".db")
+# Destination of the files
+destination = 'C:/gcpy'
+file_name = str(this_date.month) + '_' + str(this_date.year)
+folder_name = destination + '/' + file_name + '/'
+pathlib.Path(folder_name).mkdir(parents=True, exist_ok=True)
+
+# access (or create) database file '{month}_{year}.db'
+db = sqlite3.connect(folder_name + file_name + '.db')
 conn = db.cursor()
 
-# TODO: txt ve db dosyalrını kendi klasörlerinde tut
+# TODO: txt ve db dosyalarını kendi klasörlerinde tut
 
 # Create table if not exist in the database file
 db.execute('''CREATE TABLE IF NOT EXISTS
@@ -147,9 +151,9 @@ def del_manual():
 
 # Update time options
 def update_date_time_options():
-    print("1 - Tarihi değiştir \ Update date")
-    print("2 - Bir tarihdeki saati değiştir \ Update a time from specific date")
-    print("3 - Ana menü \ Main menu")
+    print('1 - Tarihi değiştir \ Update date')
+    print('2 - Bir tarihdeki saati değiştir \ Update a time from specific date')
+    print('3 - Ana menü \ Main menu')
 
 
 # Update date and time function
@@ -161,21 +165,21 @@ def update_date_time():
         user_input = user_input_control()
         if user_input == 1:
             # Update date
-            print("Güncellemek istediğiniz gün \ Date you want to update:")
+            print('Güncellemek istediğiniz gün \ Date you want to update:')
             date_d2 = regex_date()
-            print("Yeni tarih değeri \ New date value:")
+            print('Yeni tarih değeri \ New date value:')
             date_d1 = regex_date()
-            conn.execute("UPDATE veriler SET date = ? WHERE date = ?",
+            conn.execute('UPDATE veriler SET date = ? WHERE date = ?',
                          (date_d1, date_d2))
         elif user_input == 2:
             # Update specific time of the date
-            print("Güncellemeyi yapacağınız gün \ The day you'll perform update:")
+            print('Güncellemeyi yapacağınız gün \ The day you\'ll perform update:')
             date1 = regex_date()
-            print("Güncellemek istediğiniz saat \ Time you want to update:")
+            print('Güncellemek istediğiniz saat \ Time you want to update:')
             time1 = regex_time()
-            print("Yeni saat değeri \ New time value:")
+            print('Yeni saat değeri \ New time value:')
             time2 = regex_time()
-            conn.execute("UPDATE veriler SET time = ? WHERE date = ? AND time = ?",
+            conn.execute('UPDATE veriler SET time = ? WHERE date = ? AND time = ?',
                          (time2, date1, time1))
         elif user_input == 3:
             # main menu
@@ -233,8 +237,8 @@ def txt_writelines(file, lines):
 
 # Calculate time difference between first and last time input
 def calc_time():
-    file_name = destination + str(this_date.month) + "_" + str(this_date.year) + ".txt"
-    file = open(file_name, "w")
+    file_destination = folder_name + file_name + '.txt'
+    file = open(file_destination, 'w')
 
     table_title = '{0:12s} {1:15s} {2:7s}'.format('Tarih', 'Saat', 'Süre')
     print(table_title)
@@ -302,7 +306,7 @@ def choices():
 def exit_app():
     db.close()
     print('Veriler kayıt edildi. \ Records are saved.')
-    print('Çıkmak için Enter a basın. \ Pres Enter to exit.')
+    print('Çıkmak için Enter a basın. \ Press Enter to exit.')
     input('')
     sys.exit()
 
