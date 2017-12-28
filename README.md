@@ -11,7 +11,7 @@ Getting Started
 ---------------
 
 You can edit the destination for the files with changing destination variable in the calculations.py
-If you do not, application creates a folder to this destination as \gcpy\{month}_{year} then creates {month}_{year}.db in it.
+If you do not, application creates a folder to this destination as \gcpy\{month}\_{year} then creates {month}\_{year}.db in it.
 
 Files
 ---------------
