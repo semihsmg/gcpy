@@ -6,12 +6,12 @@ Pre-requisites
 --------------
 
 - Python 3.x
-- IDE for editing 
 
 Getting Started
 ---------------
-You can edit the destination variable in the calculations.py
-If  you do not want to change it, should create a destination "C:/gcpy/" to your environment.
+
+You can edit the destination for the files with changing destination variable in the calculations.py
+If you do not, application creates a folder to this destination as \gcpy\{month}_{year} then creates {month}_{year}.db in it.
 
 Files
 ---------------
