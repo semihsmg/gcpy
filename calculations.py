@@ -99,13 +99,37 @@ def add_now(now):
     record_msg()
 
 
-# TODO: Bu güne farklı saat ekleme
+def add_manual_options():
+    print('1 - Bu gün için saat ekle \ Add time for today')
+    print('2 - Farklı bir güne saat ekle \ Add different day and time')
+    print('3 - Ana menü \ Main menu')
+
+
 # Add a date and time record to the database file with user input
-def add_manual():
-    conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
-                 (regex_date(), regex_time()))
-    db.commit()
-    record_msg()
+def add_manual(now):
+    move_on = False
+    while not move_on:
+        add_manual_options()
+        user_input = user_input_control()
+        if user_input == 1:
+            conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
+                         (date(now), regex_time()))
+        elif user_input == 2:
+            conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
+                         (regex_date(), regex_time()))
+        elif user_input == 3:
+            # main menu
+            return
+        if user_input == (1 or 2 or 3):
+            if user_input == (1 or 2):
+                print('Veri silindi \ Record deleted')
+            move_on = True
+        else:
+            print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.'
+                                                             '\nThere is not ' + str(user_input) + ' as an option')
+
+        db.commit()
+        record_msg()
 
 
 # Get the user input and check whether is number or not
@@ -325,7 +349,7 @@ def operations(now):
     if user_input == 1:
         add_now(now)
     elif user_input == 2:
-        add_manual()
+        add_manual(now)
     elif user_input == 3:
         del_manual()
     elif user_input == 4:
