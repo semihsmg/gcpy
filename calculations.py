@@ -37,9 +37,9 @@ else:
 # date format as day.month.year
 dateFormat = '%d.%m.%Y'
 # time format as 24 hr base Hour:Minutes
-timeFormat = '%H:%M'  # :%S
+timeFormat = '%H:%M'
 # For time addition in the time calculation function because date object resets itself after 23:59
-timeFormat_with_day = '%d:%H:%M'  # :%S
+timeFormat_with_day = '%d:%H:%M'
 
 
 # get the date of now
@@ -118,11 +118,11 @@ def add_manual(now):
             conn.execute('INSERT INTO veriler (date,time) VALUES (?,?)',
                          (regex_date(), regex_time()))
         elif user_input == 3:
-            # main menu
+            # return menu
             return
-        if user_input == (1 or 2 or 3):
-            if user_input == (1 or 2):
-                print('Veri silindi \ Record deleted')
+        if user_input is 1 or 2 or 3:
+            if user_input is 1 or 2:
+                print('Veri eklendi \ Record added')
             move_on = True
         else:
             print('Seçenekler arasında ' + str(user_input) + ' mevcut değil.'
@@ -135,7 +135,7 @@ def add_manual(now):
 # Get the user input and check whether is number or not
 def user_input_control():
     try:
-        return int(input('>>>'))
+        return int(input('>'))
     except ValueError:
         print('Sayı giriniz. \ Enter a number please.')
 
@@ -164,8 +164,8 @@ def del_manual():
         elif user_input == 3:
             # main menu
             return
-        if user_input == (1 or 2 or 3):
-            if user_input == (1 or 2):
+        if user_input is 1 or 2 or 3:
+            if user_input is 1 or 2:
                 print('Veri silindi \ Record deleted')
             move_on = True
         else:
@@ -223,7 +223,7 @@ def update_date_time():
 
 
 def dict_ts():
-    # Creates dictionary and sorts array with time values
+    # Creates dictionary and sorts array with respect to time values
     dict_raw = {}
     dict_sort = {}
     for veri in conn.execute('SELECT date, time FROM veriler'):
@@ -270,17 +270,21 @@ def calc_time():
     print(table_title)
     txt_write(file, table_title + '\n')
 
-    # Store times to different arrays as before and after 17:30
+    # Store time values to different arrays as before and after 17:30
     before_1730_list = []
     after_1730_list = []
     time_to_leave = '17:30'
     # Loops through time values
     for key, arr in dict_ts().items():
+        # get max and min time values from dictionary
         min_value = min(arr)
         max_value = max(arr)
+        if min_value >= time_to_leave:
+            after_1730_list.append(str(difference(min_value, max_value)))
         if max_value <= time_to_leave:
+            # add difference of the time values and store it in list
             before_1730_list.append(str(difference(min_value, max_value)))
-        else:
+        elif min_value < time_to_leave <= max_value:
             before_1730_list.append(str(difference(min_value, time_to_leave)))
             after_1730_list.append(str(difference(time_to_leave, max_value)))
         table_str(file, str(key), table_time_str(min_value, max_value), str(difference(min_value, max_value)))
