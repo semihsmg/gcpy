@@ -336,7 +336,7 @@ def choices():
 def exit_app():
     db.close()
     print('Veriler kayıt edildi. \ Records are saved.')
-    print('Çıkmak için Enter a basın. \ Press Enter to exit.')
+    print('Çıkmak için bir tuşa a basın. \ Press any key to exit.')
     input('')
     sys.exit()
 
@@ -345,7 +345,7 @@ def line():
     print('-------------------')
 
 
-# All opreations
+# All operations
 def operations(now):
     choices()
     user_input = user_input_control()
